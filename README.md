@@ -1,43 +1,117 @@
-# sbcntr-frontend
+# React Router v7 ペットショップデモ
 
-書籍「AWSコンテナ設計・構築[本格]入門」のフロントエンドアプリケーション用のダウンロードリポジトリです。
+React Router v7で構築されたモダンなペットショップアプリケーションです。
 
-## 概要
+## 機能
 
-本書を引用する形でサンプルアプリケーションについて説明します。
+- **ペットカタログ**: 詳細情報カード付きのペット閲覧機能
+- **ショッピングカート**: localStorage永続化によるグローバルカート管理
+- **インタラクティブUI**: モーダルダイアログ、リアルタイム更新、レスポンシブデザイン
+- **サーバーサイドレンダリング**: SEOとパフォーマンス向上のための完全SSR対応
+- **型安全性**: ルート型生成による完全なTypeScript統合
+- **モダンスタック**: React 18、Tailwind CSS、Radix UIコンポーネント
 
-今回はフロントエンドアプリケーションから、ユーザーのサインアップやログインを実施します。
-ユーザー情報はデータベースに保管されており、TypeScript の型安全のしくみを十分発揮させるために O/R マッパを導入しています。
-今回は Prisma[^prisma]と呼ばれる O/R マッパを利用します。
-Prisma のトップページには、「Next-generation ORM for Node.js and TypeScript」と記載されています。
-今後のサーバーサイドの TypeScript 開発において非常に優秀な O/R マッパとなっています。
-データベースのマイグレーション機能も備えており、サンプルアプリケーションのテーブル作成やサンプルデータ投入でも Prisma の機能を利用しています。
+## 要件
 
-[^prisma]: https://www.prisma.io/
+- Node.js >= 22.12.0
+- pnpm 9.15.0（自動で強制される）
 
-フロントエンドアプリケーションはダッシュボード形式の UI としています。
-オフィスに導入したアイテムをアイテムリストとして表示して共有して閲覧するような UI をイメージしています。
-バックエンドアプリケーションと通信するためのサンプルとして活用するために、アイテムの追加も可能としています。
-本来であれば、ユーザーを新規登録可能とするにはドメイン制御をしたりメール認証等もすべきです。
-今回はサンプルであるため、このような機能要件は省いています。
-備えている画面は次の通りです。
+## インストール
 
-- ログイン前トップページ(index.tsx)
-  - DB 接続なしで画面表示をするために用意した画面です。
-  - いわゆるウェルカムページの役割で、Hello world を表示するために利用します。
-- ログインページ(auth/login.tsx)、サインアップページ(auth/signup.tsx)
-  - ユーザーログイン用途です。
-  - 現状はログインユーザーごとでログイン後画面の表示制御はしていないですが、認証済ユーザーでないとメインコンテンツページには遷移できないという意図で作成しています。
-- アイテムリストページ(top.tsx)
-  - 認証済ユーザーがデータベースに追加したアイテム一覧を表示するためのページです。
-  - 気に入ったアイテムはお気に入りマークをつけることができます。**本来、ユーザごとにお気に入りをしたアイテムを分けるべきですが、今回はその部分までつくりこんではおりません**。
-  - さらに、新しいアイテムが登録できます。
-- お気に入りページ(farovite.tsx)
-  - お気に入りマークがついたアイテムを表示するページです。
-- 通知ページ(notification.tsx)
-  - 認証済ユーザーにお知らせをするための通知ページです。
-  - 未読通知を既読にできます。
+```bash
+# リポジトリをクローン
+git clone https://github.com/horsewin/react-router-v7-playground.git
+cd react-router-v7-playground
 
-## 利用想定
+# 依存関係をインストール（pnpmを使用）
+pnpm install
+```
 
-本書の内容に沿って、ご利用ください。
+## 開発
+
+```bash
+# 開発サーバーを起動
+pnpm dev
+
+# 型チェック
+pnpm typecheck
+
+# ルート型を生成
+pnpm typegen
+
+# リンティングとフォーマット
+pnpm check
+pnpm fix
+```
+
+## ビルド・本番環境
+
+```bash
+# 本番用ビルド
+pnpm build
+
+# 本番サーバーを起動
+pnpm start
+```
+
+## Docker
+
+マルチステージビルドによるDockerサポートが含まれています：
+
+```bash
+# Dockerでビルド・実行
+docker build -t react-router-pet-shop .
+docker run -p 3000:3000 react-router-pet-shop
+
+# docker-composeを使用する場合（利用可能な場合）
+docker-compose up
+```
+
+## プロジェクト構造
+
+```
+app/
+├── components/        # 再利用可能なUIコンポーネント
+│   ├── ui/           # ベースUIコンポーネント（shadcn/ui）
+│   └── *.tsx         # 機能コンポーネント
+├── contexts/         # React Contextプロバイダー
+├── lib/             # ユーティリティ関数
+├── routes/          # ルートコンポーネント
+├── types/           # TypeScript型定義
+├── app.css          # グローバルスタイル
+├── root.tsx         # ルートレイアウトコンポーネント
+└── routes.ts        # ルート設定
+
+public/              # 静的アセット
+react-router.config.ts  # React Router設定
+```
+
+## 主要技術
+
+- **[React Router v7](https://reactrouter.com/)** - フルスタックReactフレームワーク
+- **[React 18](https://react.dev/)** - UIライブラリ
+- **[TypeScript](https://www.typescriptlang.org/)** - 型安全性
+- **[Tailwind CSS](https://tailwindcss.com/)** - ユーティリティファーストCSS
+- **[Radix UI](https://www.radix-ui.com/)** - ヘッドレスUIコンポーネント
+- **[Vite](https://vitejs.dev/)** - ビルドツール
+- **[Biome](https://biomejs.dev/)** - リンティング・フォーマッティング
+
+## 設定
+
+### 環境変数
+
+- `BACKEND_URL` - バックエンドAPI URL（オプション、設定されていない場合はモックデータを使用）
+
+### React Router設定
+
+このアプリケーションはSSRが有効なReact Router v7を使用しています。設定は`react-router.config.ts`で確認できます。
+
+## ルート
+
+- `/` - ウェルカム画面付きのホームページ
+- `/pets` - フィルタリング・検索機能付きペットカタログ
+- `/healthcheck` - アプリケーションヘルスステータス
+
+## ライセンス
+
+MIT
