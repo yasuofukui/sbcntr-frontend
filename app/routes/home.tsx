@@ -1,4 +1,3 @@
-import React from "react";
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
 import { config } from "~/lib/config";
@@ -24,39 +23,25 @@ export function meta() {
 }
 
 export async function loader() {
-  let dataBackendUrl = {
-    data: { message: "Hello, API response cannot be used" }
-  };
-  let dataServiceConnect = {
-    data: { message: "Hello, API response cannot be used for service connect" }
-  };
-
   // Backend URL fetch with proper error handling
   try {
     const responseBackendUrl = await fetch(
       `${config.api.backendUrl}/v1/helloworld`
     );
     if (responseBackendUrl.ok) {
-      dataBackendUrl = await responseBackendUrl.json();
+      const response = (await responseBackendUrl.json()) as {
+        data: { message: string };
+      };
+      return {
+        message: response.data.message
+      };
     }
   } catch (error) {
     console.error("Error fetching data from backend:", error);
   }
 
-  // Service Connect URL fetch with proper error handling
-  try {
-    const responseServiceConnect = await fetch(
-      `${config.api.serviceConnectUrl}/v1/helloworld`
-    );
-    if (responseServiceConnect.ok) {
-      dataServiceConnect = await responseServiceConnect.json();
-    }
-  } catch (error) {
-    console.error("Error fetching data for service connect:", error);
-  }
-
   return {
-    message: dataBackendUrl.data.message
+    message: "Hello, API response cannot be used"
   };
 }
 

@@ -11,10 +11,6 @@ export const config = {
     backendUrl: `${process.env.BACKEND_SCHEMA || "http://"}${
       process.env.BACKEND_FQDN || "localhost"
     }:${process.env.BACKEND_PORT || "8081"}`,
-    // Service Connect経由のバックエンドAPIのエンドポイント
-    serviceConnectUrl: `${process.env.BACKEND_SCHEMA || "http://"}${
-      process.env.BACKEND_SERVICE_CONNECT_FQDN || "localhost"
-    }:${process.env.BACKEND_PORT || "8081"}`
   }
 };
 
