@@ -286,7 +286,7 @@ export function ReservationFormModal({
               htmlFor="date"
               className="text-left sm:text-right whitespace-nowrap flex items-center gap-1 pt-2"
             >
-              見学予定日時
+              見学予定日
               <span className="text-red-500">*</span>
             </Label>
             <div className="sm:col-span-3 space-y-2">
