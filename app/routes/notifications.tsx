@@ -9,6 +9,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { useNotifications } from "~/contexts/notificationProvider";
 import { useToast } from "~/hooks/use-toast";
 import { config } from "~/lib/config";
+import { fetchWithRetry } from "~/lib/http";
 import {
   convertServerNotificationsToClient,
   SAMPLE_NOTIFICATIONS
@@ -64,7 +65,11 @@ export async function action({ request }: Route.ActionArgs): Promise<{
 // サーバーから通知データを取得
 export async function loader() {
   try {
-    const response = await fetch(`${config.api.backendUrl}/v1/notifications`);
+    const response = await fetchWithRetry(
+      `${config.api.backendUrl}/v1/notifications`,
+      undefined,
+      { timeoutMs: 10_000, retries: 3 }
+    );
 
     if (response.ok) {
       const data: NotificationsResponse = await response.json();

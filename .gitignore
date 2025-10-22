@@ -18,3 +18,4 @@ node_modules
 .claude
 CLAUDE.md
 .serena
+data/

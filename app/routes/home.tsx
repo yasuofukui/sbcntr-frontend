@@ -1,6 +1,7 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
 import { config } from "~/lib/config";
+import { fetchWithRetry } from "~/lib/http";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -23,26 +24,25 @@ export function meta() {
 }
 
 export async function loader() {
-  // Backend URL fetch with proper error handling
   try {
-    const responseBackendUrl = await fetch(
-      `${config.api.backendUrl}/v1/helloworld`
+    const res = await fetchWithRetry(
+      `${config.api.backendUrl}/v1/helloworld`,
+      undefined,
+      {
+        timeoutMs: 10_000,
+        retries: 3
+      }
     );
-    if (responseBackendUrl.ok) {
-      const response = (await responseBackendUrl.json()) as {
-        data: { message: string };
-      };
-      return {
-        message: response.data.message
-      };
+
+    if (res.ok) {
+      const json = (await res.json()) as { data: { message: string } };
+      return { message: json.data.message };
     }
   } catch (error) {
     console.error("Error fetching data from backend:", error);
   }
 
-  return {
-    message: "Hello, API response cannot be used"
-  };
+  return { message: "Hello, API response cannot be used" };
 }
 
 function HeroSection({ message }: { message: string }) {

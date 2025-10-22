@@ -4,6 +4,7 @@ import { convertKeysToCamelCase } from "~/lib/utils";
 import type { Pet } from "~/types/pet";
 import type { Route } from "../../../.react-router/types/app/routes/pets/+types";
 import { config } from "~/lib/config";
+import { fetchWithRetry } from "~/lib/http";
 
 // サンプルデータ
 export const SAMPLE_PETS: Pet[] = [
@@ -235,7 +236,11 @@ export const SAMPLE_PETS: Pet[] = [
 
 export async function loader() {
   try {
-    const response = await fetch(`${config.api.backendUrl}/v1/pets`);
+    const response = await fetchWithRetry(
+      `${config.api.backendUrl}/v1/pets`,
+      undefined,
+      { timeoutMs: 10_000, retries: 3 }
+    );
     const data = await response.json();
     if (response.ok) {
       // snake_case から camelCase に変換

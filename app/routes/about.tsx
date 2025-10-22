@@ -1,37 +1,32 @@
 import type { Route } from "./+types/home";
 import { config } from "~/lib/config";
+import { fetchWithRetry } from "~/lib/http";
 
 export function meta() {
   return [
     { title: "sample web app" },
-    { name: "description", content: "Welcome to v2" },
+    { name: "description", content: "Welcome to v2" }
   ];
 }
 
 export async function loader() {
-  let dataBackendUrl = null;
   try {
-    const responseBackendUrl = await fetch(
+    const res = await fetchWithRetry(
       `${config.api.backendUrl}/v1/helloworld/error`,
-    ).catch((error) => {
-      console.error("Error fetching data:", error);
-      dataBackendUrl = {
-        data: { message: "about info is not found" },
-      };
-    });
+      undefined,
+      { timeoutMs: 10_000, retries: 3 }
+    );
 
-    if (responseBackendUrl instanceof Response && !dataBackendUrl) {
-      dataBackendUrl = await responseBackendUrl.json();
+    if (res.ok) {
+      const json = (await res.json()) as { data: { message: string } };
+      return { message: json.data.message };
     }
   } catch (error) {
     console.error("some error occurred", error);
-    return {
-      message: dataBackendUrl?.data.message ?? "about info is not found",
-    };
   }
 
   return {
-    message: dataBackendUrl.data.message,
+    message: "about info is not found"
   };
 }
 
