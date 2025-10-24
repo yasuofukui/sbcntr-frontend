@@ -88,6 +88,7 @@ export async function fetchWithRetry(
       await sleep(computeBackoffDelay(baseDelayMs, attempt));
     } catch (error) {
       clearTimeout(timeoutId);
+      console.error("fetchWithRetry error:", attempt);
       // ネットワークエラーやタイムアウトはリトライ対象
       if (attempt === maxAttempts - 1) {
         throw error;

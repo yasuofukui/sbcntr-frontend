@@ -1,4 +1,3 @@
-import { ActionFunctionArgs } from "react-router";
 import { PetCard } from "~/components/pet-card";
 import { convertKeysToCamelCase } from "~/lib/utils";
 import type { Pet } from "~/types/pet";
@@ -241,31 +240,19 @@ export async function loader() {
       undefined,
       { timeoutMs: 10_000, retries: 3 }
     );
-    const data = await response.json();
-    if (response.ok) {
-      // snake_case から camelCase に変換
-      const camelCaseResponse = convertKeysToCamelCase<Pet[]>(data.data);
 
-      // ID順でソートして一貫した順序を保つ
-      const sortedPets = camelCaseResponse.sort((a, b) => {
-        // 数値IDと文字列IDの混在に対応
-        const aId = isNaN(Number(a.id)) ? a.id : Number(a.id);
-        const bId = isNaN(Number(b.id)) ? b.id : Number(b.id);
-
-        if (typeof aId === "number" && typeof bId === "number") {
-          return aId - bId;
-        }
-        return String(aId).localeCompare(String(bId));
-      });
-
-      return { pets: sortedPets };
+    if (!response.ok) {
+      throw new Error("Failed to fetch pets");
     }
-  } catch (error) {
-    console.warn(error);
-    console.warn("fallback to sample data");
 
-    // サンプルデータもID順でソート
-    const sortedSamplePets = [...SAMPLE_PETS].sort((a, b) => {
+    const data = await response.json();
+
+    // snake_case から camelCase に変換
+    const camelCaseResponse = convertKeysToCamelCase<Pet[]>(data.data);
+
+    // ID順でソートして一貫した順序を保つ
+    const sortedPets = camelCaseResponse.sort((a, b) => {
+      // 数値IDと文字列IDの混在に対応
       const aId = isNaN(Number(a.id)) ? a.id : Number(a.id);
       const bId = isNaN(Number(b.id)) ? b.id : Number(b.id);
 
@@ -275,7 +262,10 @@ export async function loader() {
       return String(aId).localeCompare(String(bId));
     });
 
-    return { pets: sortedSamplePets };
+    return { pets: sortedPets };
+  } catch (error) {
+    console.error("Error fetching /v1/pets:", error);
+    throw error;
   }
 }
 
@@ -295,5 +285,14 @@ export default function PetsPage({ loaderData }: Route.ComponentProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+export function ErrorBoundary(_props: Route.ErrorBoundaryProps) {
+  return (
+    <main className="pt-16 p-4 container mx-auto">
+      <h1>データの取得に失敗しました</h1>
+      <p>しばらく待ってから、もう一度お試しください。</p>
+    </main>
   );
 }
