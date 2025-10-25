@@ -4,7 +4,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  isRouteErrorResponse
+  isRouteErrorResponse,
+  Link
 } from "react-router";
 
 import { Footer } from "~/components/footer";
@@ -12,6 +13,9 @@ import { Header } from "~/components/header";
 import { UserProvider } from "~/contexts/userProvider";
 import { NotificationProvider } from "~/contexts/notificationProvider";
 import { Toaster } from "~/components/ui/toaster";
+import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { PawPrint, RefreshCw, Home as HomeIcon } from "lucide-react";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -80,14 +84,49 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="pt-16 container mx-auto px-6">
+      <section className="min-h-[60vh] flex items-center justify-center bg-gradient-to-b from-orange-50 via-amber-50 to-orange-50 rounded-2xl border border-orange-100">
+        <div className="text-center max-w-2xl p-8">
+          <Badge
+            variant="secondary"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-orange-100 text-orange-800 border-orange-200"
+          >
+            <PawPrint className="w-4 h-4" />
+            {message}
+          </Badge>
+
+          <h1 className="mt-4 text-3xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
+            {details}
+          </h1>
+
+          {stack && (
+            <pre className="mt-6 text-left w-full p-4 overflow-x-auto bg-white/60 backdrop-blur rounded-xl border border-orange-100 text-xs text-gray-700">
+              <code>{stack}</code>
+            </pre>
+          )}
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCw className="w-5 h-5 mr-2" />
+              再読み込み
+            </Button>
+            <Link to="/">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-orange-300 text-orange-700 hover:bg-orange-50 transition-all duration-300"
+              >
+                <HomeIcon className="w-5 h-5 mr-2" />
+                ホームへ
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

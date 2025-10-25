@@ -26,7 +26,7 @@ export function meta() {
 export async function loader() {
   try {
     const res = await fetchWithRetry(
-      `${config.api.backendUrl}/v1/helloworld`,
+      new URL(`${config.api.backendUrl}/v1/helloworld`),
       undefined,
       {
         timeoutMs: 10_000,

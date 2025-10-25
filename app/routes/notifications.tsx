@@ -66,7 +66,7 @@ export async function action({ request }: Route.ActionArgs): Promise<{
 export async function loader() {
   try {
     const response = await fetchWithRetry(
-      `${config.api.backendUrl}/v1/notifications`,
+      new URL(`${config.api.backendUrl}/v1/notifications`),
       undefined,
       { timeoutMs: 10_000, retries: 3 }
     );

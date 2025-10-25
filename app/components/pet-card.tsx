@@ -11,7 +11,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
+  TooltipTrigger
 } from "~/components/ui/tooltip";
 import { useUser } from "~/contexts/userProvider";
 import { useToast } from "~/hooks/use-toast";
@@ -37,14 +37,14 @@ export function PetCard({ pet }: PetCardProps) {
       if (fetcher.data.status === 200) {
         toast({
           title: "「お気に入り」しました",
-          duration: 3000,
+          duration: 3000
         });
       } else {
         toast({
           title: "エラーが発生しました",
           description: "お気に入りに失敗しました",
           variant: "destructive",
-          duration: 3000,
+          duration: 3000
         });
       }
     }
@@ -58,7 +58,7 @@ export function PetCard({ pet }: PetCardProps) {
           description:
             "予期しないエラーが発生しました。もう一度お試しください。",
           variant: "destructive",
-          duration: 3000,
+          duration: 3000
         });
         return;
       }
@@ -66,12 +66,12 @@ export function PetCard({ pet }: PetCardProps) {
       fetcher.submit(
         {
           userId,
-          like: true,
+          like: true
         },
         {
           method: "post",
-          action: `/pets/${pet.id}`,
-        },
+          action: `/pets/${pet.id}`
+        }
       );
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -79,7 +79,7 @@ export function PetCard({ pet }: PetCardProps) {
         title: "エラーが発生しました",
         description: "予期しないエラーが発生しました。もう一度お試しください。",
         variant: "destructive",
-        duration: 3000,
+        duration: 3000
       });
     }
   };
@@ -136,7 +136,7 @@ export function PetCard({ pet }: PetCardProps) {
               </div>
 
               <div className="flex flex-wrap gap-2 ">
-                {pet.tags.map((tag) => (
+                {pet.tags.map(tag => (
                   <Badge
                     key={tag}
                     variant="secondary"

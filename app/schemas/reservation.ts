@@ -15,9 +15,9 @@ const isValidDate = (dateStr: string): boolean => {
     return false;
   }
 
-  const year = parseInt(dateStr.substring(0, 4));
-  const month = parseInt(dateStr.substring(4, 6));
-  const day = parseInt(dateStr.substring(6, 8));
+  const year = Number.parseInt(dateStr.substring(0, 4));
+  const month = Number.parseInt(dateStr.substring(4, 6));
+  const day = Number.parseInt(dateStr.substring(6, 8));
 
   const date = new Date(year, month - 1, day);
 

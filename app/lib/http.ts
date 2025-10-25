@@ -38,13 +38,25 @@ function computeBackoffDelay(
   return Math.round(exponential * jitterFactor);
 }
 
+/**
+ *
+ * @param input - RequestInfo | URL
+ * @param init - RequestInit
+ * @param opts - FetchWithRetryOptions
+ * @param opts.timeoutMs - タイムアウト時間（msec）。デフォルトは10000ms（10秒）。
+ * @param opts.retries - リトライ回数。デフォルトは3回。
+ * @param opts.baseDelayMs - バックオフの基準遅延（msec）。デフォルトは500ms。
+ * @param opts.retryOn - レスポンスを受け取った際に、追加のリトライ判定を行うフック。true を返すとリトライ対象になる。
+ * @returns Promise<Response> リトライが成功した場合はResponseを返す
+ * @throws Error リトライが失敗した場合はErrorを投げる、またはタイムアウトエラーが発生した場合はTimeoutErrorを投げる
+ */
 export async function fetchWithRetry(
   input: RequestInfo | URL,
   init?: RequestInit,
   opts?: FetchWithRetryOptions
 ): Promise<Response> {
   const timeoutMs = opts?.timeoutMs ?? 10_000;
-  const retries = opts?.retries ?? 3; // 失敗後の再試行回数
+  const retries = opts?.retries ?? 3;
   const baseDelayMs = opts?.baseDelayMs ?? 500;
 
   const externalSignal = init?.signal ?? undefined;
@@ -84,19 +96,23 @@ export async function fetchWithRetry(
         return response;
       }
 
-      // リトライ待機（指数バックオフ）
+      // リトライ待機
       await sleep(computeBackoffDelay(baseDelayMs, attempt));
     } catch (error) {
       clearTimeout(timeoutId);
-      console.error("fetchWithRetry error:", attempt);
       // ネットワークエラーやタイムアウトはリトライ対象
       if (attempt === maxAttempts - 1) {
         throw error;
       }
+      // リトライ失敗時のログ。inputがURLの場合はURLをログに出力する。
+      console.error(
+        "Failed to fetch with retry on attempt:",
+        attempt + 1,
+        input instanceof URL ? input.toString() : ""
+      );
       await sleep(computeBackoffDelay(baseDelayMs, attempt));
     }
   }
 
-  // ここに到達しないはずだが、型の都合で例外を投げておく
-  throw new Error("fetchWithRetry: unexpected fallthrough");
+  throw new Error("fetchWithRetry: unexpected fallthrough"); // biome-ignore lint/correctness/noUnreachable: <explanation>
 }

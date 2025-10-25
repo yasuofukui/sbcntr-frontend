@@ -22,7 +22,7 @@ import {
 } from "~/schemas/reservation";
 import { CheckCircle, AlertCircle, Calendar } from "lucide-react";
 import { useEffect, useCallback, forwardRef } from "react";
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 import { useToast } from "~/hooks/use-toast";
 
 // 共通化されたFormInputコンポーネント（refフォワーディング対応）
