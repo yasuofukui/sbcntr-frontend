@@ -1,4 +1,4 @@
-import { action } from "~/routes/notifications";
+import type { action } from "~/routes/notifications";
 
 // クライアント側で使用する通知型
 export type Notification = {

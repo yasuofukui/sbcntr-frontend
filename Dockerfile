@@ -1,37 +1,39 @@
-# ベースイメージをDebianベースのものに変更
-FROM public.ecr.aws/docker/library/node:22-slim AS dependencies-env
+# === builder: 依存関係生成用 ===
+FROM public.ecr.aws/docker/library/node:22-slim AS builder
+WORKDIR /app
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
     procps \
     && rm -rf /var/lib/apt/lists/*
-RUN npm install -g pnpm
-COPY . /app
-
-# 開発用依存関係のインストール
-FROM dependencies-env AS development-dependencies-env
-COPY ./package.json pnpm-lock.yaml /app/
-WORKDIR /app
+# pnpmはcorepackで有効化。ただしNode.js25以降では廃止の可能性もあるため注意
+RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
-
-# 本番用依存関係のインストール
-FROM dependencies-env AS production-dependencies-env
-COPY ./package.json pnpm-lock.yaml /app/
-WORKDIR /app
-RUN pnpm install --prod --frozen-lockfile
-
-# ビルドステージ
-FROM dependencies-env AS build-env
-COPY ./package.json pnpm-lock.yaml /app/
-COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-WORKDIR /app
+COPY . .
 RUN pnpm build
 
-# 最終ステージ
-FROM dependencies-env
-COPY ./package.json pnpm-lock.yaml /app/
-COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/build /app/build
+# === prod-deps: 本番用依存関係のみ抽出 ===
+FROM public.ecr.aws/docker/library/node:22-slim AS prod-deps
 WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
+# === runner: 最終イメージ===
+FROM public.ecr.aws/docker/library/node:22-slim AS runner
+ENV NODE_ENV=production
+ENV PORT=8080
+WORKDIR /app
+COPY --chown=node:node package.json pnpm-lock.yaml /app/
+COPY --from=prod-deps --chown=node:node /app/node_modules /app/node_modules
+COPY --from=builder  --chown=node:node /app/build        /app/build
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:8080/healthcheck').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+USER node
 CMD ["npm", "run", "start"]

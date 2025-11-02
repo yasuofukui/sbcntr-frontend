@@ -1,266 +1,34 @@
-import { ActionFunctionArgs } from "react-router";
 import { PetCard } from "~/components/pet-card";
+import { Link } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "~/components/ui/button";
+import { RefreshCw, Home as HomeIcon } from "lucide-react";
 import { convertKeysToCamelCase } from "~/lib/utils";
 import type { Pet } from "~/types/pet";
 import type { Route } from "../../../.react-router/types/app/routes/pets/+types";
 import { config } from "~/lib/config";
-
-// サンプルデータ
-export const SAMPLE_PETS: Pet[] = [
-  {
-    id: "1",
-    name: "cute cat",
-    breed: "brown cat",
-    color: "brown",
-    gender: "Male",
-    price: 360000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=777&q=80",
-    likes: 10,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000001",
-    // features + flag("new") を合わせて tags に入れる例
-    tags: ["cute", "famous", "cool", "new"]
-  },
-  {
-    id: "2",
-    name: "サイベリアン",
-    // 入力で "salePrice: 400000" なのでそちらを採用
-    breed: "Siberian cat",
-    color: "brown",
-    gender: "Female",
-    price: 400000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1586289883499-f11d28aaf52f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8OHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60",
-    likes: 3,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000002",
-    tags: ["cute", "famous", "cool", "on-sale"]
-  },
-  {
-    id: "3",
-    name: "Red cat",
-    // details の "color= red" から
-    breed: "red cat",
-    color: "red",
-    gender: "Male",
-    price: 240000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1606491048802-8342506d6471?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 7,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000003",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "4",
-    name: "cute kitten",
-    // details の "color= white" から
-    breed: "white cat",
-    color: "white",
-    gender: "Female",
-    price: 550000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1605450648855-63f9161b7ef7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8ODZ8fGtpdHRlbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 12,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000004",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "5",
-    name: "Matcha",
-    // details には "種別=Minuet" があるので breedを Minuet に
-    breed: "Minuet",
-    color: "touch of white",
-    gender: "Male",
-    price: 400000,
-    imageUrl:
-      "https://pbs.twimg.com/media/FaxOK5HUIAANRYo?format=jpg&name=4096x4096",
-    likes: 5,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000005",
-    // featuresをそのまま
-    tags: ["くりくりの目", "きれいな毛並み", "おてんば"]
-  },
-  {
-    id: "uma-chan",
-    name: "uma-chan",
-    // details の "color= white" から
-    breed: "kage",
-    color: "brown",
-    gender: "Female",
-    // salePrice: 49_800_000
-    price: 49800000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1557413606-2a63a06a1f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60",
-    likes: 15,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000006",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "arai-san",
-    name: "arai-san",
-    color: "brown",
-    breed: "white cat",
-    gender: "Male",
-    price: 50000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1601247387326-f8bcb5a234d4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60",
-    likes: 9,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000007",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "6",
-    name: "cute kitten",
-    breed: "white cat",
-    color: "white",
-    gender: "Female",
-    price: 550000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1597626133663-53df9633b799?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 2,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000008",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "7",
-    name: "cute kitten",
-    breed: "white cat",
-    color: "white",
-    gender: "Male",
-    price: 550000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1621238281284-d186cb6813fb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTh8fGtpdHRlbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 11,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000009",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "8",
-    name: "cute kitten",
-    breed: "white cat",
-    color: "white",
-    gender: "Female",
-    price: 550000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1557166984-b00337652c94?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fGtpdHRlbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 4,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000010",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "9",
-    name: "cute kitten",
-    breed: "white cat",
-    color: "white",
-    gender: "Male",
-    price: 550000,
-    imageUrl:
-      "https://images.unsplash.com/flagged/photo-1557427161-4701a0fa2f42?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mjh8fGtpdHRlbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 8,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000011",
-    tags: ["cute", "famous", "cool"]
-  },
-  {
-    id: "10",
-    name: "cute kitten",
-    breed: "white cat",
-    color: "white",
-    gender: "Female",
-    price: 550000,
-    imageUrl:
-      "https://images.unsplash.com/photo-1582797493098-23d8d0cc6769?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NjZ8fGtpdHRlbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
-    likes: 6,
-    shop: {
-      name: "uma-arai shop 2nd",
-      location: "Kanagawa"
-    },
-    birthDate: "2023-10-14",
-    referenceNumber: "0000012",
-    tags: ["cute", "famous", "cool"]
-  }
-];
+import { fetchWithRetry } from "~/lib/http";
 
 export async function loader() {
   try {
-    const response = await fetch(`${config.api.backendUrl}/v1/pets`);
-    const data = await response.json();
-    if (response.ok) {
-      // snake_case から camelCase に変換
-      const camelCaseResponse = convertKeysToCamelCase<Pet[]>(data.data);
+    const response = await fetchWithRetry(
+      new URL(`${config.api.backendUrl}/v1/pets`),
+      undefined,
+      { timeoutMs: 10_000, retries: 5 }
+    );
 
-      // ID順でソートして一貫した順序を保つ
-      const sortedPets = camelCaseResponse.sort((a, b) => {
-        // 数値IDと文字列IDの混在に対応
-        const aId = isNaN(Number(a.id)) ? a.id : Number(a.id);
-        const bId = isNaN(Number(b.id)) ? b.id : Number(b.id);
-
-        if (typeof aId === "number" && typeof bId === "number") {
-          return aId - bId;
-        }
-        return String(aId).localeCompare(String(bId));
-      });
-
-      return { pets: sortedPets };
+    if (!response.ok) {
+      throw new Error("Failed to fetch pets");
     }
-  } catch (error) {
-    console.warn(error);
-    console.warn("fallback to sample data");
 
-    // サンプルデータもID順でソート
-    const sortedSamplePets = [...SAMPLE_PETS].sort((a, b) => {
+    const data = await response.json();
+
+    // snake_case から camelCase に変換
+    const camelCaseResponse = convertKeysToCamelCase<Pet[]>(data.data);
+
+    // ID順でソートして一貫した順序を保つ
+    const sortedPets = camelCaseResponse.sort((a, b) => {
+      // 数値IDと文字列IDの混在に対応
       const aId = isNaN(Number(a.id)) ? a.id : Number(a.id);
       const bId = isNaN(Number(b.id)) ? b.id : Number(b.id);
 
@@ -270,7 +38,10 @@ export async function loader() {
       return String(aId).localeCompare(String(bId));
     });
 
-    return { pets: sortedSamplePets };
+    return { pets: sortedPets };
+  } catch (error) {
+    console.error("Error fetching /v1/pets:", error);
+    throw error;
   }
 }
 
@@ -290,5 +61,84 @@ export default function PetsPage({ loaderData }: Route.ComponentProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+export function ErrorBoundary(_props: Route.ErrorBoundaryProps) {
+  const [availableHeight, setAvailableHeight] = useState<number>();
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    // ResizeObserverを使ってヘッダーとフッターの高さを取得し、それをもとにmain要素の高さを計算する
+    const prevOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+
+    const headerEl = document.querySelector("header");
+    const footerEl = document.querySelector("footer");
+
+    const computeHeight = () => {
+      const headerH = headerEl?.getBoundingClientRect().height ?? 0;
+      const footerH = footerEl?.getBoundingClientRect().height ?? 0;
+      const vh = window.innerHeight;
+      const contentH = Math.max(0, vh - headerH - footerH);
+      setAvailableHeight(contentH);
+    };
+
+    const headerObserver = new ResizeObserver(computeHeight);
+    const footerObserver = new ResizeObserver(computeHeight);
+    headerEl && headerObserver.observe(headerEl);
+    footerEl && footerObserver.observe(footerEl);
+    window.addEventListener("resize", computeHeight);
+
+    // 初回計算処理、以降はresizeイベントで計算する
+    computeHeight();
+
+    return () => {
+      document.documentElement.style.overflow = prevOverflow;
+      headerObserver.disconnect();
+      footerObserver.disconnect();
+      window.removeEventListener("resize", computeHeight);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-orange-50 via-amber-50 to-orange-50" />
+      <main
+        ref={mainRef as unknown as React.RefObject<any>}
+        className="container mx-auto px-6 pt-16 pb-16 flex items-center justify-center overflow-hidden"
+        style={availableHeight ? { height: `${availableHeight}px` } : undefined}
+      >
+        <div className="text-center max-w-xl mx-auto p-8">
+          <h2 className="mt-4 text-3xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
+            データの取得に失敗しました
+          </h2>
+          <p className="mt-3 text-gray-700">
+            しばらく待ってから、もう一度お試しください。
+          </p>
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCw className="w-5 h-5 mr-2" />
+              再読み込み
+            </Button>
+            <Link to="/">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-orange-300 text-orange-700 hover:bg-orange-50 transition-all duration-300"
+              >
+                <HomeIcon className="w-5 h-5 mr-2" />
+                ホームへ
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </main>
+    </>
   );
 }
