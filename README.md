@@ -41,4 +41,3 @@ Prisma のトップページには、「Next-generation ORM for Node.js and Type
 ## 利用想定
 
 本書の内容に沿って、ご利用ください。
-"# Dockle Security Scan Test" 
