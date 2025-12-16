@@ -1,0 +1,85 @@
+sbcntr-frontend
+Copyright 2025 uma-arai
+
+This product includes software developed at
+https://github.com/uma-arai/sbcntr-frontend
+
+=========================================================================
+Third Party Dependencies
+=========================================================================
+
+This product includes the following third-party software:
+
+1. React
+   - License: MIT
+   - Copyright (c) Meta Platforms, Inc. and affiliates
+   - https://github.com/facebook/react
+
+2. React Router v7
+   - License: MIT
+   - Copyright (c) React Training LLC 2015-2019
+   - Copyright (c) Remix Software Inc. 2020-2021
+   - Copyright (c) Shopify Inc. 2022-2024
+   - https://github.com/remix-run/react-router
+
+3. Radix UI
+   - License: MIT
+   - Copyright (c) 2022 WorkOS
+   - https://github.com/radix-ui/primitives
+
+4. React Hook Form
+   - License: MIT
+   - Copyright (c) 2019-present Beier (Bill) Luo
+   - https://github.com/react-hook-form/react-hook-form
+
+5. Zod
+   - License: MIT
+   - Copyright (c) 2020 Colin McDonnell
+   - https://github.com/colinhacks/zod
+
+6. Tailwind CSS
+   - License: MIT
+   - Copyright (c) Tailwind Labs, Inc.
+   - https://github.com/tailwindlabs/tailwindcss
+
+7. date-fns
+   - License: MIT
+   - Copyright (c) 2021 Sasha Koss and Lesha Koss
+   - https://github.com/date-fns/date-fns
+
+8. uuid
+   - License: MIT
+   - Copyright (c) 2010-2024 Robert Kieffer and other contributors
+   - https://github.com/uuidjs/uuid
+
+9. Lucide React
+   - License: ISC
+   - Copyright (c) 2020 Lucide Contributors
+   - https://github.com/lucide-icons/lucide
+
+10. Class Variance Authority
+    - License: Apache 2.0
+    - Copyright (c) 2022 Joe Bell
+    - https://github.com/joe-bell/cva
+
+11. clsx
+    - License: MIT
+    - Copyright (c) Luke Edwards
+    - https://github.com/lukeed/clsx
+
+12. Vite
+    - License: MIT
+    - Copyright (c) 2019-present, Yuxi (Evan) You and Vite contributors
+    - https://github.com/vitejs/vite
+
+13. Biome
+    - License: MIT/Apache 2.0
+    - Copyright (c) 2023-present, Biome contributors
+    - https://github.com/biomejs/biome
+
+14. TypeScript
+    - License: Apache 2.0
+    - Copyright (c) Microsoft Corporation
+    - https://github.com/microsoft/TypeScript
+
+For complete license texts, please refer to the respective project repositories.

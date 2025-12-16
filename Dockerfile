@@ -1,47 +1,39 @@
-FROM node:14.16.0-alpine3.13 AS builder
-RUN apk add --no-cache libc6-compat
+# === builder: 依存関係生成用 ===
+FROM public.ecr.aws/docker/library/node:22-slim AS builder
 WORKDIR /app
-RUN apk add --update --no-cache --virtual build-deps \
+RUN apt-get update && apt-get install -y \
     python3 \
+    make \
     g++ \
-    git \
-    libtool \
-    automake \
-    autoconf
-
-# Add libvips
-RUN apk add --upgrade --no-cache vips-dev build-base --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community/
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+# pnpmはcorepackで有効化。ただしNode.js25以降では廃止の可能性もあるため注意
+RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 COPY . .
+RUN pnpm build
 
-# install production dependencies
-RUN yarn install --pure-lockfile --production
-
-# Note also that prisma generate is automatically invoked when you're installing the @prisma/client npm package
-RUN npx prisma generate
-
-# Save production depenencies installed so we can later copy them in the production image
-RUN cp -R node_modules /tmp/node_modules
-
-# install all dependencies including devDependencies
-RUN yarn install --pure-lockfile
-RUN yarn build
-
-###########
-FROM node:14.16.0-alpine3.13
+# === prod-deps: 本番用依存関係のみ抽出 ===
+FROM public.ecr.aws/docker/library/node:22-slim AS prod-deps
 WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
 
-RUN apk add --no-cache curl tzdata && \
-    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-    apk del tzdata
+# === runner: 最終イメージ===
+FROM public.ecr.aws/docker/library/node:22-slim AS runner
+ENV NODE_ENV=production
+ENV PORT=8080
+WORKDIR /app
+COPY --chown=node:node package.json pnpm-lock.yaml /app/
+COPY --from=prod-deps --chown=node:node /app/node_modules /app/node_modules
+COPY --from=builder  --chown=node:node /app/build        /app/build
 
-COPY --from=builder /tmp/node_modules ./node_modules
-COPY --from=builder /app/.blitz ./.blitz
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/db ./
+EXPOSE 8080
 
-ENV PORT 80
-EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:8080/healthcheck').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-CMD [ "npm","run","start:prd" ]
-# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl
+USER node
+CMD ["npm", "run", "start"]
