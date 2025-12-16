@@ -2,7 +2,7 @@ name: Dockle Security Scan
 
 on:
   pull_request:
-    branches: [feature/test-dockle-scan]
+    branches: feature/test-dockle-scan
 
 env:
   DOCKER_BUILDKIT: "1"
